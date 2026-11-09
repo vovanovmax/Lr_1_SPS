@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Lr_2.Services\Lr_2.Services.csproj" />
+  </ItemGroup>
+
 </Project>

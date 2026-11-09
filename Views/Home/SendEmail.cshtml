@@ -1,0 +1,40 @@
+﻿@model WebApplication2.Models.EmailViewModel
+@{
+    ViewData["Title"] = "Надіслати Email";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Відправка Email</h1>
+
+    @if (ViewBag.Status != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @ViewBag.Status
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4 col-md-8">
+        <div class="card-header">
+            <i class="fas fa-paper-plane me-1"></i>
+            Форма відправки листа
+        </div>
+        <div class="card-body">
+            <form asp-controller="Home" asp-action="SendEmail" method="post">
+                <div class="mb-3">
+                    <label asp-for="ToEmail" class="form-label">Email отримувача</label>
+                    <input asp-for="ToEmail" type="email" class="form-control" placeholder="example@gmail.com" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Subject" class="form-label">Тема листа</label>
+                    <input asp-for="Subject" type="text" class="form-control" placeholder="Тема..." required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Message" class="form-label">Повідомлення</label>
+                    <textarea asp-for="Message" class="form-control" rows="5" placeholder="Текст листа..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
