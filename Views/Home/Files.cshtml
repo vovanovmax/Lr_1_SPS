@@ -1,0 +1,91 @@
+﻿@model IEnumerable<WebApplication2.Models.FileViewModel>
+@{
+    ViewData["Title"] = "Файли на сервері";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Файлове сховище (wwwroot/Files)</h1>
+
+    @if (TempData["FileMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["FileMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["FileError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["FileError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Блок 1: Razor-форма для завантаження файлу -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-upload me-1"></i>
+            Завантажити новий файл на сервер
+        </div>
+        <div class="card-body">
+            <form asp-controller="Home" asp-action="UploadFile" method="post" enctype="multipart/form-data" class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <input type="file" name="uploadedFile" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-cloud-upload-alt me-1"></i> Завантажити
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Блок 2: Таблиця файлів з директорії wwwroot/Files -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-folder-open me-1"></i>
+            Наявні файли на сервері (натисніть на файл для перегляду)
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <p class="text-muted mb-0">У директорії <code>wwwroot/Files</code> ще немає жодного файлу.</p>
+            }
+            else
+            {
+                <table class="table table-bordered table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Назва файлу</th>
+                            <th>Тип</th>
+                            <th>Розмір</th>
+                            <th>Дата завантаження</th>
+                            <th>Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Home" asp-action="ViewFile" asp-route-fileName="@file.Name" class="fw-bold text-decoration-none">
+                                        <i class="fas fa-file me-1"></i> @file.Name
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary">@file.Extension</span></td>
+                                <td>@file.Size</td>
+                                <td>@file.LastModified.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                <td>
+                                    <a asp-controller="Home" asp-action="ViewFile" asp-route-fileName="@file.Name" class="btn btn-sm btn-outline-primary">
+                                        Переглянути
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

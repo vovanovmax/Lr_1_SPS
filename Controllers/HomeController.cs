@@ -1,31 +1,133 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WebApplication2.Models;
-using Lr_2.Services; // Підключаємо бібліотеку сервісів
+using Lr_2.Services;
 
 namespace WebApplication2.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IEmailSender _emailSender; 
+        private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        public HomeController(ILogger<HomeController> logger, IEmailSender emailSender)
+        public HomeController(
+            ILogger<HomeController> logger,
+            IEmailSender emailSender,
+            IWebHostEnvironment appEnvironment)
         {
             _logger = logger;
             _emailSender = emailSender;
+            _appEnvironment = appEnvironment;
         }
 
-        public IActionResult Index()
+        public IActionResult Index() => View();
+
+        // 1. Сторінка зі списком усіх файлів у wwwroot/Files та формою завантаження (Лаб 4)
+        [HttpGet]
+        public IActionResult Files()
         {
-            return View();
+            string filesFolder = Path.Combine(_appEnvironment.WebRootPath, "Files");
+            if (!Directory.Exists(filesFolder))
+            {
+                Directory.CreateDirectory(filesFolder);
+            }
+
+            var directoryInfo = new DirectoryInfo(filesFolder);
+            var filesList = directoryInfo.GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
+                .Select(f => new FileViewModel
+                {
+                    Name = f.Name,
+                    Extension = f.Extension.ToLower(),
+                    Size = $"{Math.Round(f.Length / 1024.0, 2)} KB",
+                    LastModified = f.LastWriteTime
+                })
+                .ToList();
+
+            return View(filesList);
+        }
+
+        // 2. Обробка завантаження файлу через Razor-форму (Лаб 4)
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile uploadedFile)
+        {
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                string filesFolder = Path.Combine(_appEnvironment.WebRootPath, "Files");
+                if (!Directory.Exists(filesFolder))
+                {
+                    Directory.CreateDirectory(filesFolder);
+                }
+
+                string safeFileName = Path.GetFileName(uploadedFile.FileName);
+                string filePath = Path.Combine(filesFolder, safeFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await uploadedFile.CopyToAsync(fileStream);
+                }
+
+                TempData["FileMessage"] = $"Файл «{safeFileName}» успішно завантажено на сервер!";
+            }
+            else
+            {
+                TempData["FileError"] = "Оберіть файл перед натисканням кнопки завантаження.";
+            }
+
+            return RedirectToAction("Files");
+        }
+
+        // 3. Окрема сторінка для перегляду вибраного файлу при кліку на нього (Лаб 4)
+        [HttpGet]
+        public async Task<IActionResult> ViewFile(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return RedirectToAction("Files");
+
+            string safeFileName = Path.GetFileName(fileName);
+            string filePath = Path.Combine(_appEnvironment.WebRootPath, "Files", safeFileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound("Файл не знайдено на сервері.");
+
+            var fileInfo = new FileInfo(filePath);
+            string ext = fileInfo.Extension.ToLower();
+
+            var model = new FileViewModel
+            {
+                Name = fileInfo.Name,
+                Extension = ext,
+                Size = $"{Math.Round(fileInfo.Length / 1024.0, 2)} KB",
+                LastModified = fileInfo.LastWriteTime
+            };
+
+            string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
+            string[] textExtensions = { ".txt", ".log", ".json", ".xml", ".cs", ".html", ".css", ".js", ".md", ".csv" };
+
+            if (imageExtensions.Contains(ext))
+            {
+                model.FileCategory = "image";
+            }
+            else if (ext == ".pdf")
+            {
+                model.FileCategory = "pdf";
+            }
+            else if (textExtensions.Contains(ext))
+            {
+                model.FileCategory = "text";
+                model.TextContent = await System.IO.File.ReadAllTextAsync(filePath);
+            }
+            else
+            {
+                model.FileCategory = "other";
+            }
+
+            return View(model);
         }
 
         [HttpGet]
-        public IActionResult SendEmail()
-        {
-            return View();
-        }
+        public IActionResult SendEmail() => View();
 
         [HttpPost]
         public async Task<IActionResult> SendEmail(EmailViewModel model)
@@ -39,10 +141,7 @@ namespace WebApplication2.Controllers
             return View(model);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Privacy() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

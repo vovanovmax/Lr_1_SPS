@@ -1,7 +1,12 @@
 using Lr_2.Services;
+using Microsoft.EntityFrameworkCore;
+using WebApplication2;
 using WebApplication2.Middlewares;
+using WebApplication2.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 builder.Services.AddControllersWithViews();
 
@@ -9,6 +14,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
+
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 
