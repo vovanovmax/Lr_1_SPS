@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using WebApplication2.Models;
 using Lr_2.Services;
+using Microsoft.AspNetCore.Localization;
+
 
 namespace WebApplication2.Controllers
 {
@@ -23,7 +25,18 @@ namespace WebApplication2.Controllers
 
         public IActionResult Index() => View();
 
-        // 1. Сторінка зі списком усіх файлів у wwwroot/Files та формою завантаження (Лаб 4)
+        [HttpPost]
+        public IActionResult SetLanguage(string culture, string returnUrl)
+        {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+
+            return LocalRedirect(returnUrl ?? "~/");
+        }
+        
         [HttpGet]
         public IActionResult Files()
         {
@@ -48,7 +61,6 @@ namespace WebApplication2.Controllers
             return View(filesList);
         }
 
-        // 2. Обробка завантаження файлу через Razor-форму (Лаб 4)
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile uploadedFile)
         {
@@ -78,7 +90,7 @@ namespace WebApplication2.Controllers
             return RedirectToAction("Files");
         }
 
-        // 3. Окрема сторінка для перегляду вибраного файлу при кліку на нього (Лаб 4)
+
         [HttpGet]
         public async Task<IActionResult> ViewFile(string fileName)
         {

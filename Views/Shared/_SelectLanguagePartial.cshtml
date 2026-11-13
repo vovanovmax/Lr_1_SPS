@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Options
+@using WebApplication2
+
+@inject IHtmlLocalizer<SharedResource> SharedLocalizer
+@inject IOptions<RequestLocalizationOptions> LocOptions
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var cultureItems = LocOptions.Value.SupportedUICultures!
+        .Select(c => new SelectListItem { Value = c.Name, Text = c.NativeName.ToUpper() })
+        .ToList();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path)
+        ? "~/"
+        : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
+}
+
+<form asp-controller="Home" asp-action="SetLanguage" asp-route-returnUrl="@returnUrl" method="post" class="d-flex align-items-center me-3">
+    <span class="text-white-50 me-2 small">@SharedLocalizer["Language"]:</span>
+    <select name="culture"
+            onchange="this.form.submit();"
+            asp-for="@requestCulture!.RequestCulture.UICulture.Name"
+            asp-items="cultureItems"
+            class="form-select form-select-sm bg-dark text-white border-secondary"
+            style="width: auto; cursor: pointer;">
+    </select>
+</form>

@@ -37,6 +37,9 @@
             </div>
         </form>
         <!-- Navbar-->
+        <div class="ms-auto d-flex align-items-center">
+            @await Html.PartialAsync("_SelectLanguagePartial")
+        </div>
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
@@ -59,7 +62,7 @@
                         @*<a class="nav-link" href="index.html">*@
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
+                            @SharedLocalizer["Dashboard"]
                         </a>
                         <div class="sb-sidenav-menu-heading">Interface</div>
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
@@ -115,16 +118,14 @@
                         </a>
                     </div>
                 </div>
-
                 <a class="nav-link" asp-controller="Home" asp-action="Files">
                     <div class="sb-nav-link-icon"><i class="fas fa-folder"></i></div>
-                    Files (Lab 4)
+                    @SharedLocalizer["Files"]
                 </a>
-
 
                 <a class="nav-link" asp-controller="Home" asp-action="SendEmail">
                     <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
-                    Send Email
+                    @SharedLocalizer["SendEmail"]
                 </a>
                 <div class="sb-sidenav-footer">
                     <div class="small">Logged in as:</div>
