@@ -1,4 +1,5 @@
 using Lr_2.Services;
+using WebApplication2.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (!app.Environment.IsDevelopment())
 {
